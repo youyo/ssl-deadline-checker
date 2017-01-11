@@ -1,0 +1,155 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "appengine/cloudsql",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "rmNwGgFJAcDxUGF5yB/zqhQPxCA=",
+			"path": "bitbucket.org/liamstask/goose/cmd/goose",
+			"revision": "8488cc47d90c8a502b1c41a462a6d9cc8ee0a895",
+			"revisionTime": "2015-01-15T23:40:39Z"
+		},
+		{
+			"checksumSHA1": "jdqLDQw64kBjkU7LPK7C+Qwj7W8=",
+			"path": "bitbucket.org/liamstask/goose/lib/goose",
+			"revision": "8488cc47d90c8a502b1c41a462a6d9cc8ee0a895",
+			"revisionTime": "2015-01-15T23:40:39Z"
+		},
+		{
+			"checksumSHA1": "QD6LqgLz2JMxXqns8TaxtK9AuHs=",
+			"path": "github.com/go-sql-driver/mysql",
+			"revision": "2e00b5cd70399450106cec6431c2e2ce3cae5034",
+			"revisionTime": "2016-12-24T12:10:19Z"
+		},
+		{
+			"checksumSHA1": "ZWcMUoeBtWL/tOlEuRPnz2FYmY4=",
+			"path": "github.com/gocraft/dbr",
+			"revision": "10fa49bf1ee63a0f822283ef9805d818f9e84742",
+			"revisionTime": "2016-10-05T23:50:33Z"
+		},
+		{
+			"checksumSHA1": "55EGtYyfh4/MQq533CWJqFlBh5Q=",
+			"path": "github.com/gocraft/dbr/dialect",
+			"revision": "10fa49bf1ee63a0f822283ef9805d818f9e84742",
+			"revisionTime": "2016-10-05T23:50:33Z"
+		},
+		{
+			"checksumSHA1": "p+Bj1OSkp9/zxr6oZGzBAvYsdm0=",
+			"path": "github.com/kylelemons/go-gypsy/yaml",
+			"revision": "08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8",
+			"revisionTime": "2016-09-05T02:00:20Z"
+		},
+		{
+			"checksumSHA1": "o7rSvFuxoUlEug3+jT1jz5ArAwc=",
+			"path": "github.com/labstack/echo",
+			"revision": "63262b2311720cabd9f55432183634fad8860ccf",
+			"revisionTime": "2017-01-10T04:23:57Z"
+		},
+		{
+			"checksumSHA1": "R6DzcBLEP0BONPpsyr+11N7xh5w=",
+			"path": "github.com/labstack/gommon/color",
+			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
+			"revisionTime": "2016-12-29T16:36:05Z"
+		},
+		{
+			"checksumSHA1": "8kYg34fqMUS7xbSWA9lyWbVNELg=",
+			"path": "github.com/labstack/gommon/log",
+			"revision": "c8c07aa087422c146b86d2f79556b450a8e630a1",
+			"revisionTime": "2016-12-29T16:36:05Z"
+		},
+		{
+			"checksumSHA1": "JnN7V2ff27U0k2Xuc1RJSa520QQ=",
+			"path": "github.com/lib/pq",
+			"revision": "8df6253d1317616f36b0c3740eb30c239a7372cb",
+			"revisionTime": "2017-01-03T19:20:09Z"
+		},
+		{
+			"checksumSHA1": "xppHi82MLqVx1eyQmbhTesAEjx8=",
+			"path": "github.com/lib/pq/oid",
+			"revision": "8df6253d1317616f36b0c3740eb30c239a7372cb",
+			"revisionTime": "2017-01-03T19:20:09Z"
+		},
+		{
+			"checksumSHA1": "I4njd26dG5hxFT2nawuByM4pxzY=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "d228849504861217f796da67fae4f6e347643f15",
+			"revisionTime": "2016-11-03T16:00:40Z"
+		},
+		{
+			"checksumSHA1": "xZuhljnmBysJPta/lMyYmJdujCg=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "30a891c33c7cde7b02a981314b4228ec99380cca",
+			"revisionTime": "2016-11-23T14:36:37Z"
+		},
+		{
+			"checksumSHA1": "0OBvNBRVUAP/pI73TUSKF4e7pqU=",
+			"path": "github.com/mattn/go-sqlite3",
+			"revision": "efea85cb9a06f1d4f661649f6beb5fd04597a366",
+			"revisionTime": "2017-01-09T15:40:58Z"
+		},
+		{
+			"checksumSHA1": "USE8noRDp4jM3zj2pA/4t1b6700=",
+			"path": "github.com/tylerb/graceful",
+			"revision": "d37e108c89765a8e307f15b8fb2ecd10575da6bb",
+			"revisionTime": "2017-01-03T16:22:03Z"
+		},
+		{
+			"checksumSHA1": "PQy6kV2rK5B3qtCRpANzgRQPnFs=",
+			"path": "github.com/valyala/fasttemplate",
+			"revision": "3b874956e03f1636d171bda64b130f9135f42cff",
+			"revisionTime": "2016-03-15T19:31:34Z"
+		},
+		{
+			"checksumSHA1": "Ak1mii27DHhEIjLnNqhK2HNibxg=",
+			"path": "github.com/ziutek/mymysql/godrv",
+			"revision": "501176fc99be4b4fb0fd01ae8d6af5d8bb408e44",
+			"revisionTime": "2016-11-23T14:17:03Z"
+		},
+		{
+			"checksumSHA1": "cvt/0LZs6e/nY56iY8YxRGbuFO0=",
+			"path": "github.com/ziutek/mymysql/mysql",
+			"revision": "501176fc99be4b4fb0fd01ae8d6af5d8bb408e44",
+			"revisionTime": "2016-11-23T14:17:03Z"
+		},
+		{
+			"checksumSHA1": "x5wFYF5U9/AMBxJ5LQZayskPW7o=",
+			"path": "github.com/ziutek/mymysql/native",
+			"revision": "501176fc99be4b4fb0fd01ae8d6af5d8bb408e44",
+			"revisionTime": "2016-11-23T14:17:03Z"
+		},
+		{
+			"checksumSHA1": "TK1Yr8BbwionaaAvM+77lwAAx/8=",
+			"path": "golang.org/x/crypto/acme",
+			"revision": "1d77d5bd477a5879ed443a73e11a1a3dd9616d03",
+			"revisionTime": "2017-01-10T02:12:51Z"
+		},
+		{
+			"checksumSHA1": "MG1frAM4p4lg1ioOhUa7rjN3xm0=",
+			"path": "golang.org/x/crypto/acme/autocert",
+			"revision": "1d77d5bd477a5879ed443a73e11a1a3dd9616d03",
+			"revisionTime": "2017-01-10T02:12:51Z"
+		},
+		{
+			"checksumSHA1": "9jjO5GjLa0XF/nfWihF02RoH4qc=",
+			"path": "golang.org/x/net/context",
+			"revision": "60c41d1de8da134c05b7b40154a9a82bf5b7edb9",
+			"revisionTime": "2017-01-10T03:16:11Z"
+		},
+		{
+			"checksumSHA1": "WHc3uByvGaMcnSoI21fhzYgbOgg=",
+			"path": "golang.org/x/net/context/ctxhttp",
+			"revision": "60c41d1de8da134c05b7b40154a9a82bf5b7edb9",
+			"revisionTime": "2017-01-10T03:16:11Z"
+		},
+		{
+			"checksumSHA1": "uTQtOqR0ePMMcvuvAIksiIZxhqU=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "d75a52659825e75fff6158388dddc6a5b04f9ba5",
+			"revisionTime": "2016-12-14T18:38:57Z"
+		}
+	],
+	"rootPath": "github.com/youyo/ssl-deadline-checker"
+}
