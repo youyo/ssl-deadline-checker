@@ -1,11 +1,29 @@
 version: '2'
 services:
-  mysql:
+  ssl_deadline_checker_mysql:
     image: mysql:5.6
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=ssldeadline
     ports:
-      - "3306:3306"
-    #volumes:
-    #  - "$PWD/docker-init:/docker-entrypoint-initdb.d:ro"
+      - "3306"
+    volumes:
+      - "$PWD/data:/var/lib/mysql:rw"
+    restart: always
+  ssl_deadline_checker_webapp:
+    image: youyo/ssl-deadline-checker:latest
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=secret
+      - MYSQL_DATABASE=ssldeadline
+      - MYSQL_HOST=ssl.deadline.checker.mysql
+      - MYSQL_PORT=3306
+      - SLACK_CHANNEL=''
+      - SLACK_TOKEN=''
+    ports:
+      - "1323:1323"
+    depends_on:
+      - ssl_deadline_checker_mysql
+    links:
+      - ssl_deadline_checker_mysql:ssl.deadline.checker.mysql
+    restart: always
