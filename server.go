@@ -52,9 +52,6 @@ type Hostnames struct {
 	UpdatedAt     string `db:"updated_at"`
 }
 
-// slack notification day
-const notificationDay = 60
-
 func main() {
 	// initialilze
 	e := echo.New()
@@ -224,6 +221,7 @@ func updateQuery(hostname string) (err error) {
 	if err != nil {
 		return
 	}
+	notificationDay, _ := strconv.Atoi(os.Getenv("SLACK_NOTIFICATION_DAY"))
 	if notificationDay > remainingDays {
 		message := "https://" + hostname + "'s ssl deadline is " + timeLimit + ". " + strconv.Itoa(remainingDays) + " days left until the deadline."
 		if err = notify(message); err != nil {

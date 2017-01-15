@@ -20,6 +20,7 @@ services:
       - MYSQL_PORT=3306
       - SLACK_CHANNEL=''
       - SLACK_TOKEN=''
+      - SLACK_NOTIFICATION_DAY=60
     ports:
       - "1323:1323"
     depends_on:

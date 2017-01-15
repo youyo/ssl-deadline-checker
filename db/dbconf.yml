@@ -5,7 +5,7 @@ test:
 
 development:
     driver: mymysql
-    open: tcp:127.0.0.1:3306*ssldeadline/root/secret
+    open: tcp:ssl.deadline.checker.mysql:3306*ssldeadline/root/secret
 
 production:
     driver: postgres
