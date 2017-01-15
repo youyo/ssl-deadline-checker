@@ -46,4 +46,4 @@ stop-mysql:
 help:
 	@make2help $(MAKEFILE_LIST)
 
-.PHONY: setup deps update vet lint test zabbix-build zabbix-destroy help
+.PHONY: setup deps update vet lint test start-mysql stop-mysql help
