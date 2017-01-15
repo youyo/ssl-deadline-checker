@@ -13,3 +13,4 @@ Vagrantfile
 dist/
 vendor/*
 !vendor/vendor.json
+data/

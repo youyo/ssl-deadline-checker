@@ -1,10 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
+	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -35,7 +39,10 @@ type (
 	}
 )
 
-// database
+// table name
+const hostnames = "hostnames"
+
+// hostnames table struct
 type Hostnames struct {
 	ID            int    `db:"id"`
 	Hostname      string `db:"hostname"`
@@ -45,7 +52,8 @@ type Hostnames struct {
 	UpdatedAt     string `db:"updated_at"`
 }
 
-const hostnames = "hostnames"
+// slack notification day
+const notificationDay = 60
 
 func main() {
 	// initialilze
@@ -64,6 +72,9 @@ func main() {
 
 	// show specific host
 	g.GET("/:hostname", func(c echo.Context) error { return showSpecificHosts(c) })
+
+	// check deadline
+	g.POST("/check/:hostname", func(c echo.Context) error { return checkDeadline(c) })
 
 	// server start
 	e.Logger.Fatal(e.Start(":1323"))
@@ -135,7 +146,7 @@ func checkCertLimit(hostname string) (timeLimit string, remainingDays int, err e
 }
 
 func showAllHosts(c echo.Context) (err error) {
-	// select database
+	// select from database
 	sess, err := connectDb()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
@@ -149,7 +160,7 @@ func showAllHosts(c echo.Context) (err error) {
 }
 
 func showSpecificHosts(c echo.Context) (err error) {
-	// select database
+	// select from database
 	sess, err := connectDb()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
@@ -161,4 +172,92 @@ func showSpecificHosts(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	return c.JSON(http.StatusOK, Response{Response: d, Error: err})
+}
+
+func notify(message string) (err error) {
+	// slack url
+	var slackApiUrl string = "https://slack.com/api/chat.postMessage"
+
+	// get from env
+	slackToken := os.Getenv("SLACK_TOKEN")
+	slackChannel := os.Getenv("SLACK_CHANNEL")
+
+	// make post data
+	slackPostData := url.Values{}
+	slackPostData.Set("token", slackToken)
+	slackPostData.Set("channel", slackChannel)
+	slackPostData.Set("username", "SSL Deadline Checker")
+	slackPostData.Set("text", message)
+	slackPostData.Set("icon_emoji", ":squirrel:")
+
+	// post slack
+	client := &http.Client{}
+	r, err := http.NewRequest("POST", fmt.Sprintf("%s", slackApiUrl), bytes.NewBufferString(slackPostData.Encode()))
+	if err != nil {
+		return
+	}
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	_, err = client.Do(r)
+	if err != nil {
+		return
+	}
+	return nil
+}
+
+func updateQuery(hostname string) (err error) {
+	// check cert
+	timeLimit, remainingDays, err := checkCertLimit(hostname)
+	if err != nil {
+		return
+	}
+
+	// update
+	sess, err := connectDb()
+	if err != nil {
+		return
+	}
+	_, err = sess.Update(hostnames).
+		Set("timelimit", timeLimit).
+		Set("remaining_days", remainingDays).
+		Where("hostname = ?", hostname).
+		Exec()
+	if err != nil {
+		return
+	}
+	if notificationDay > remainingDays {
+		message := "https://" + hostname + "'s ssl deadline is " + timeLimit + ". " + strconv.Itoa(remainingDays) + " days left until the deadline."
+		if err = notify(message); err != nil {
+			return
+		}
+	}
+	return nil
+}
+
+func checkDeadline(c echo.Context) (err error) {
+	hostname := c.Param("hostname")
+	return func() error {
+		if hostname == "all" {
+			sess, err := connectDb()
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+			}
+			var s ShowHosts
+			_, err = sess.Select("hostname").
+				From("hostnames").
+				Load(&s)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+			}
+			for _, v := range s {
+				if err = updateQuery(v.Hostname); err != nil {
+					return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+				}
+			}
+		} else {
+			if err = updateQuery(hostname); err != nil {
+				return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+			}
+		}
+		return c.JSON(http.StatusOK, Response{Response: "ok", Error: err})
+	}()
 }
