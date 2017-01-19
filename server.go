@@ -14,6 +14,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 // request & response
@@ -55,6 +56,9 @@ type Hostnames struct {
 func main() {
 	// initialilze
 	e := echo.New()
+
+	// cors
+	e.Use(middleware.CORS())
 
 	// routing
 	g := e.Group("/ssl-deadline")
