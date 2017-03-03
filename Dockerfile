@@ -9,4 +9,4 @@ RUN apt-get install make git gcc && \
 	make deps
 
 EXPOSE 1323:1323
-ENTRYPOINT ["go","run","*.go"]
+ENTRYPOINT ["go","run","notify.go", "render.go", "server.go", "ssl.go"]
