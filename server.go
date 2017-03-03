@@ -1,10 +1,7 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 
@@ -157,33 +154,6 @@ func showSpecificHosts(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	return c.JSON(http.StatusOK, Response{Response: d, Error: err})
-}
-
-func notify(message string) (err error) {
-	// slack url
-	var slackApiUrl string = "https://slack.com/api/chat.postMessage"
-
-	// get from env
-	slackToken := os.Getenv("SLACK_TOKEN")
-	slackChannel := os.Getenv("SLACK_CHANNEL")
-
-	// make post data
-	slackPostData := url.Values{}
-	slackPostData.Set("token", slackToken)
-	slackPostData.Set("channel", slackChannel)
-	slackPostData.Set("username", "SSL Deadline Checker")
-	slackPostData.Set("text", message)
-	slackPostData.Set("icon_emoji", ":squirrel:")
-
-	// post slack
-	client := &http.Client{}
-	r, err := http.NewRequest("POST", fmt.Sprintf("%s", slackApiUrl), bytes.NewBufferString(slackPostData.Encode()))
-	if err != nil {
-		return
-	}
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	_, err = client.Do(r)
-	return
 }
 
 func updateQuery(hostname string) (err error) {
