@@ -1,0 +1,56 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <link href='css/bootstrap.min.css' rel='stylesheet'>
+  </head>
+  <body>
+    <nav class='navbar navbar-inverse navbar-fixed-top'>
+      <div class='container-fluid'>
+        <div class='navbar-header'>
+          <a class='navbar-brand' href='#'>
+            SSL Deadline Checker
+          </a>
+        </div>
+      </div>
+    </nav>
+    <div class='container-fluid'>
+      <div class='row'>
+        <div class='col-sm-8 col-md-offset-2 col-md-10 col-md-offset-1 main'>
+          <br/>
+          <h1 class='page-header'>
+            Hostnames
+          </h1>
+          <div class='table-responsive'>
+            <table class='table table-striped'>
+              <thead>
+                <tr>
+                  <th>hostname</th>
+                  <th>timelimit</th>
+                  <th>remaining_days</th>
+                  <th>notification_days</th>
+                  <th>created_at</th>
+                </tr>
+              </thead>
+              <tbody>
+				{{range .}}
+                  <tr>
+					  <td>{{.Hostname}}</td>
+					  <td>{{.Timelimit}}</td>
+					  <td>{{.RemainingDays}}</td>
+					  <td>{{.NotificationDays}}</td>
+					  <td>{{.CreatedAt}}</td>
+                  </tr>
+				{{end}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js'></script>
+    <script src='js/bootstrap.min.js'></script>
+  </body>
+</html>
+{{end}}

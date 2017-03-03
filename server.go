@@ -1,15 +1,10 @@
 package main
 
 import (
-	"bytes"
-	"crypto/tls"
-	"fmt"
-	"math"
+	"html/template"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
@@ -20,16 +15,18 @@ import (
 // request & response
 type (
 	RegisterRequest struct {
-		Hostname string `json:"hostname"`
+		Hostname         string `json:"hostname"`
+		NotificationDays int    `json:"notification_days"`
 	}
 
 	HostData struct {
-		ID            int    `json:"id"`
-		Hostname      string `json:"hostname"`
-		Timelimit     string `json:"timelimit"`
-		RemainingDays int    `json:"remaining_days"`
-		CreatedAt     string `json:"created_at"`
-		UpdatedAt     string `json:"updated_at"`
+		ID               int    `json:"id"`
+		Hostname         string `json:"hostname"`
+		Timelimit        string `json:"timelimit"`
+		RemainingDays    int    `json:"remaining_days"`
+		NotificationDays int    `json:"notification_days"`
+		CreatedAt        string `json:"created_at"`
+		UpdatedAt        string `json:"updated_at"`
 	}
 
 	ShowHosts []HostData
@@ -45,12 +42,13 @@ const hostnames = "hostnames"
 
 // hostnames table struct
 type Hostnames struct {
-	ID            int    `db:"id"`
-	Hostname      string `db:"hostname"`
-	Timelimit     string `db:"timelimit"`
-	RemainingDays int    `db:"remaining_days"`
-	CreatedAt     string `db:"created_at"`
-	UpdatedAt     string `db:"updated_at"`
+	ID               int    `db:"id"`
+	Hostname         string `db:"hostname"`
+	Timelimit        string `db:"timelimit"`
+	RemainingDays    int    `db:"remaining_days"`
+	NotificationDays int    `db:"notification_days"`
+	CreatedAt        string `db:"created_at"`
+	UpdatedAt        string `db:"updated_at"`
 }
 
 func main() {
@@ -60,8 +58,17 @@ func main() {
 	// cors
 	e.Use(middleware.CORS())
 
-	// routing
-	g := e.Group("/ssl-deadline")
+	// use static file
+	e.Static("/", "public/assets")
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob("public/views/*.html")),
+	}
+
+	// view
+	e.GET("/", index)
+
+	// routing to api
+	g := e.Group("/api")
 
 	// show all hosts
 	g.GET("/", func(c echo.Context) error { return showAllHosts(c) })
@@ -101,7 +108,7 @@ func connectDb() (sess *dbr.Session, err error) {
 
 func registerHost(c echo.Context) (err error) {
 	// bind json
-	r := new(RegisterRequest)
+	r := &RegisterRequest{NotificationDays: 45}
 	if err = c.Bind(r); err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Response: nil, Error: err})
 	}
@@ -109,7 +116,7 @@ func registerHost(c echo.Context) (err error) {
 	// check cert
 	timeLimit, remainingDays, err := checkCertLimit(r.Hostname)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+		return c.JSON(http.StatusBadRequest, Response{Response: nil, Error: err})
 	}
 
 	// insert database
@@ -118,8 +125,8 @@ func registerHost(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	_, err = sess.InsertInto(hostnames).
-		Columns("hostname", "timelimit", "remaining_days").
-		Values(r.Hostname, timeLimit, remainingDays).
+		Columns("hostname", "timelimit", "remaining_days", "notification_days").
+		Values(r.Hostname, timeLimit, remainingDays, r.NotificationDays).
 		Exec()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
@@ -130,22 +137,6 @@ func registerHost(c echo.Context) (err error) {
 	return c.JSON(http.StatusCreated, Response{Response: status{true}, Error: err})
 }
 
-func checkCertLimit(hostname string) (timeLimit string, remainingDays int, err error) {
-	conn, err := tls.Dial("tcp", hostname+":443", &tls.Config{})
-	defer conn.Close()
-	if err != nil {
-		return
-	}
-	certs := conn.ConnectionState().PeerCertificates
-	jst, _ := time.LoadLocation("Asia/Tokyo")
-	t := certs[0].NotAfter.In(jst)
-	timeLimit = t.Format("2006-01-02")
-	duration := t.Sub(time.Now())
-	remainingDays64 := math.Floor(duration.Hours() / 24)
-	remainingDays = int(remainingDays64)
-	return
-}
-
 func showAllHosts(c echo.Context) (err error) {
 	// select from database
 	sess, err := connectDb()
@@ -153,7 +144,7 @@ func showAllHosts(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	var s ShowHosts
-	_, err = sess.Select("*").From("hostnames").Load(&s)
+	_, err = sess.Select("*").From("hostnames").OrderBy("remaining_days").Load(&s)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
@@ -173,36 +164,6 @@ func showSpecificHosts(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	return c.JSON(http.StatusOK, Response{Response: d, Error: err})
-}
-
-func notify(message string) (err error) {
-	// slack url
-	var slackApiUrl string = "https://slack.com/api/chat.postMessage"
-
-	// get from env
-	slackToken := os.Getenv("SLACK_TOKEN")
-	slackChannel := os.Getenv("SLACK_CHANNEL")
-
-	// make post data
-	slackPostData := url.Values{}
-	slackPostData.Set("token", slackToken)
-	slackPostData.Set("channel", slackChannel)
-	slackPostData.Set("username", "SSL Deadline Checker")
-	slackPostData.Set("text", message)
-	slackPostData.Set("icon_emoji", ":squirrel:")
-
-	// post slack
-	client := &http.Client{}
-	r, err := http.NewRequest("POST", fmt.Sprintf("%s", slackApiUrl), bytes.NewBufferString(slackPostData.Encode()))
-	if err != nil {
-		return
-	}
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	_, err = client.Do(r)
-	if err != nil {
-		return
-	}
-	return nil
 }
 
 func updateQuery(hostname string) (err error) {
@@ -225,8 +186,16 @@ func updateQuery(hostname string) (err error) {
 	if err != nil {
 		return
 	}
-	notificationDay, _ := strconv.Atoi(os.Getenv("SLACK_NOTIFICATION_DAY"))
-	if notificationDay > remainingDays {
+	sess, err = connectDb()
+	if err != nil {
+		return
+	}
+	var d HostData
+	_, err = sess.Select("notification_days").From("hostnames").Where("hostname=?", hostname).Load(&d)
+	if err != nil {
+		return
+	}
+	if d.NotificationDays >= remainingDays {
 		message := "https://" + hostname + "'s ssl deadline is " + timeLimit + ". " + strconv.Itoa(remainingDays) + " days left until the deadline."
 		if err = notify(message); err != nil {
 			return
