@@ -20,16 +20,18 @@ import (
 // request & response
 type (
 	RegisterRequest struct {
-		Hostname string `json:"hostname"`
+		Hostname         string `json:"hostname"`
+		NotificationDays int    `json:"notification_days"`
 	}
 
 	HostData struct {
-		ID            int    `json:"id"`
-		Hostname      string `json:"hostname"`
-		Timelimit     string `json:"timelimit"`
-		RemainingDays int    `json:"remaining_days"`
-		CreatedAt     string `json:"created_at"`
-		UpdatedAt     string `json:"updated_at"`
+		ID               int    `json:"id"`
+		Hostname         string `json:"hostname"`
+		Timelimit        string `json:"timelimit"`
+		RemainingDays    int    `json:"remaining_days"`
+		NotificationDays int    `json:"notification_days"`
+		CreatedAt        string `json:"created_at"`
+		UpdatedAt        string `json:"updated_at"`
 	}
 
 	ShowHosts []HostData
@@ -45,12 +47,13 @@ const hostnames = "hostnames"
 
 // hostnames table struct
 type Hostnames struct {
-	ID            int    `db:"id"`
-	Hostname      string `db:"hostname"`
-	Timelimit     string `db:"timelimit"`
-	RemainingDays int    `db:"remaining_days"`
-	CreatedAt     string `db:"created_at"`
-	UpdatedAt     string `db:"updated_at"`
+	ID               int    `db:"id"`
+	Hostname         string `db:"hostname"`
+	Timelimit        string `db:"timelimit"`
+	RemainingDays    int    `db:"remaining_days"`
+	NotificationDays int    `db:"notification_days"`
+	CreatedAt        string `db:"created_at"`
+	UpdatedAt        string `db:"updated_at"`
 }
 
 func main() {
@@ -101,7 +104,7 @@ func connectDb() (sess *dbr.Session, err error) {
 
 func registerHost(c echo.Context) (err error) {
 	// bind json
-	r := new(RegisterRequest)
+	r := &RegisterRequest{NotificationDays: 45}
 	if err = c.Bind(r); err != nil {
 		return c.JSON(http.StatusBadRequest, Response{Response: nil, Error: err})
 	}
@@ -118,8 +121,8 @@ func registerHost(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	_, err = sess.InsertInto(hostnames).
-		Columns("hostname", "timelimit", "remaining_days").
-		Values(r.Hostname, timeLimit, remainingDays).
+		Columns("hostname", "timelimit", "remaining_days", "notification_days").
+		Values(r.Hostname, timeLimit, remainingDays, r.NotificationDays).
 		Exec()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
@@ -199,10 +202,7 @@ func notify(message string) (err error) {
 	}
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	_, err = client.Do(r)
-	if err != nil {
-		return
-	}
-	return nil
+	return
 }
 
 func updateQuery(hostname string) (err error) {
@@ -225,8 +225,16 @@ func updateQuery(hostname string) (err error) {
 	if err != nil {
 		return
 	}
-	notificationDay, _ := strconv.Atoi(os.Getenv("SLACK_NOTIFICATION_DAY"))
-	if notificationDay > remainingDays {
+	sess, err = connectDb()
+	if err != nil {
+		return
+	}
+	var d HostData
+	_, err = sess.Select("notification_days").From("hostnames").Where("hostname=?", hostname).Load(&d)
+	if err != nil {
+		return
+	}
+	if d.NotificationDays >= remainingDays {
 		message := "https://" + hostname + "'s ssl deadline is " + timeLimit + ". " + strconv.Itoa(remainingDays) + " days left until the deadline."
 		if err = notify(message); err != nil {
 			return

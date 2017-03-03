@@ -1,7 +1,7 @@
 version: '2'
 services:
   ssl_deadline_checker_mysql:
-    image: mysql:5.6
+    image: mysql:5.7
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=ssldeadline
@@ -11,7 +11,7 @@ services:
       - "$PWD/data:/var/lib/mysql:rw"
     restart: always
   ssl_deadline_checker_webapp:
-    image: youyo/ssl-deadline-checker:latest
+    build: .
     environment:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=secret
@@ -20,7 +20,6 @@ services:
       - MYSQL_PORT=3306
       - SLACK_CHANNEL=''
       - SLACK_TOKEN=''
-      - SLACK_NOTIFICATION_DAY=60
     ports:
       - "1323:1323"
     depends_on:
