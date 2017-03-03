@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 	"os"
 	"strconv"
@@ -56,6 +57,15 @@ func main() {
 
 	// cors
 	e.Use(middleware.CORS())
+
+	// use static file
+	e.Static("/", "public/assets")
+	e.Renderer = &Template{
+		templates: template.Must(template.ParseGlob("public/views/*.html")),
+	}
+
+	// view
+	e.GET("/", index)
 
 	// routing to api
 	g := e.Group("/api")
