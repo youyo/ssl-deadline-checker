@@ -7,6 +7,7 @@ OWNER := youyo
 setup:
 	go get github.com/kardianos/govendor
 	go get github.com/Songmu/make2help/cmd/make2help
+	go get bitbucket.org/liamstask/goose/cmd/goose
 
 ## Install dependencies
 deps: setup
