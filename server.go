@@ -134,7 +134,7 @@ func showAllHosts(c echo.Context) (err error) {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
 	var s ShowHosts
-	_, err = sess.Select("*").From("hostnames").Load(&s)
+	_, err = sess.Select("*").From("hostnames").OrderBy("remaining_days").Load(&s)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
 	}
