@@ -60,8 +60,8 @@ func main() {
 	// cors
 	e.Use(middleware.CORS())
 
-	// routing
-	g := e.Group("/ssl-deadline")
+	// routing to api
+	g := e.Group("/api")
 
 	// show all hosts
 	g.GET("/", func(c echo.Context) error { return showAllHosts(c) })
