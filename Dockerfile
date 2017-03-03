@@ -1,4 +1,4 @@
-FROM golang:1.7.4-wheezy
+FROM golang:1.8-wheezy
 MAINTAINER youyo
 
 ENV APP_DIR /go/src/github.com/youyo/ssl-deadline-checker/
