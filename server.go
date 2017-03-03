@@ -112,7 +112,7 @@ func registerHost(c echo.Context) (err error) {
 	// check cert
 	timeLimit, remainingDays, err := checkCertLimit(r.Hostname)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Response{Response: nil, Error: err})
+		return c.JSON(http.StatusBadRequest, Response{Response: nil, Error: err})
 	}
 
 	// insert database
