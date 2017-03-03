@@ -2,14 +2,11 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
 	"fmt"
-	"math"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocraft/dbr"
@@ -131,22 +128,6 @@ func registerHost(c echo.Context) (err error) {
 		Status bool `json:"status"`
 	}
 	return c.JSON(http.StatusCreated, Response{Response: status{true}, Error: err})
-}
-
-func checkCertLimit(hostname string) (timeLimit string, remainingDays int, err error) {
-	conn, err := tls.Dial("tcp", hostname+":443", &tls.Config{})
-	defer conn.Close()
-	if err != nil {
-		return
-	}
-	certs := conn.ConnectionState().PeerCertificates
-	jst, _ := time.LoadLocation("Asia/Tokyo")
-	t := certs[0].NotAfter.In(jst)
-	timeLimit = t.Format("2006-01-02")
-	duration := t.Sub(time.Now())
-	remainingDays64 := math.Floor(duration.Hours() / 24)
-	remainingDays = int(remainingDays64)
-	return
 }
 
 func showAllHosts(c echo.Context) (err error) {
